@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>heart</title>
+    </head>
+    <body>
+        <canvas id="canvase" onclick="onStart(event)"></canvas>
+        <script>
+            var myCanvase=document.getElementById("canvase");
+            myCanvase.width=innerWidth;
+            myCanvase.height=innerHeight;
+            var ctx=myCanvase.getContext("2d");
+            
+            // heart对象
+            class Heart{
+                // x y r
+                constructor(x,y,r,alpha){
+                    this.x=x;
+                    this.y=y;//点
+                    this.r=(r==0?1:r);//大小
+                    this.alpha=alpha;//透明度
+                    
+                }
+                // x坐标
+                getX=(angle)=>{
+                    return this.x+this.r*(16*Math.pow(Math.sin(angle),3));
+                }
+                // y坐标
+                getY=(angle)=>{
+                    return this.y-this.r*((13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle)));
+                }
+
+                // 画heart
+                draw=()=>{
+                    ctx.strokeStyle="red";
+                    ctx.lineWidth=1;
+                    ctx.beginPath();
+                    ctx.moveTo(this.getX(0),this.getY(0));
+                    for(var angle=0;angle<=2*Math.PI;angle=angle+2*Math.PI/1000)  
+                        ctx.lineTo(this.getX(angle),this.getY(angle));
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                clear=()=>{
+                    ctx.strokeStyle="white";
+                    ctx.lineWidth=4;
+                    ctx.beginPath();
+                    ctx.moveTo(this.getX(0),this.getY(0));
+                    for(var angle=0;angle<=2*Math.PI;angle=angle+2*Math.PI/520)  
+                        ctx.lineTo(this.getX(angle),this.getY(angle));
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                //heart逐渐放大，最后消失
+                animation1=()=>{
+                    // 每隔一秒画大一点的heart
+                    var that=this;
+                    var interval=setInterval(function() {
+                        // 画一个白色的heart,覆盖掉前面的
+                        // console.log(that.x,that.y,that.r-1,that.alpha);
+                        ctx.globalCompositeOperation="source-over";
+                        var heartT=new Heart(that.x,that.y,that.r-0.1,1);
+                        // console.log(heartT);
+                        heartT.clear();
+                        that.draw();
+                        that.r=that.r+0.1;
+                        if(that.r>=6){
+                            clearInterval(interval);
+                            var heartT=new Heart(that.x,that.y,that.r-0.1,1);
+                        // console.log(heartT);
+                            heartT.clear();
+                        }
+                    },100);
+                }
+                // 逐点画出一个heart
+                animation2=()=>{
+                    var that=this;
+                    ctx.strokeStyle="red";
+                    var a=0;
+                    ctx.beginPath();
+
+                    var interval2=setInterval(() => {
+                        // ctx.globalAlpha=that.alpha;
+                        ctx.moveTo(that.getX(a),that.getY(a));
+                        a=a+2*Math.PI/40;
+                        ctx.lineTo(that.getX(a),that.getY(a));
+                        ctx.stroke();
+                        if(a>=2*Math.PI){
+                            clearInterval(interval2);
+                            that.animation1();
+                        }
+                    }, 100);
+                }
+            }
+            function onStart(event){
+                var x=event.clientX;
+                var y=event.clientY;
+             
+                var heart=new Heart(x,y,1,0.2);
+                // heart.draw();
+                heart.animation2();
+            
+            }
+            
+
+        </script>
+    </body>
+</html>
